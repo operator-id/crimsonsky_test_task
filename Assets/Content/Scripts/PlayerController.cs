@@ -6,9 +6,10 @@ namespace Scripts
     {
         [SerializeField] private PlayerCharacter character;
         [SerializeField] private float moveSpeed = 1F;
-        [Space] [SerializeField] private Camera raycastCamera;
-        [SerializeField] private LayerMask impassableLayer;
+        [Space]
+        [SerializeField] private Camera raycastCamera;
         [SerializeField] private LayerMask validMoveLayer;
+        [SerializeField] private LayerMask impassableLayer;
 
         private Vector2 _moveInput;
         private bool _queuedMoveOrder;
@@ -49,25 +50,18 @@ namespace Scripts
                 return false;
             }
 
-            var origin = raycastCamera.ScreenToWorldPoint(Input.mousePosition);
-            var results = new Collider2D[1];
-            var hitCount = Physics2D.OverlapPoint(origin, new ContactFilter2D
-            {
-                layerMask = validMoveLayer | impassableLayer
-            }, results);
+            var point = raycastCamera.ScreenToWorldPoint(Input.mousePosition);
 
-            if (hitCount == 0)
+            var hit = Physics2D.OverlapPoint(point, validMoveLayer | impassableLayer);
+
+            if (hit == null || 1 << hit.gameObject.layer == impassableLayer)
             {
                 return false;
             }
 
-            if (1 << results[0].gameObject.layer == validMoveLayer)
-            {
-                position = origin;
-                return true;
-            }
+            position = point;
 
-            return false;
+            return true;
         }
 
         private bool TryGetMoveDirectionInput(out Vector2 input)
